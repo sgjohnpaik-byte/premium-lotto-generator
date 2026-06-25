@@ -86,6 +86,15 @@ body{
 .info p{font-size:14px; color:var(--muted); line-height:1.7; margin:8px 0;}
 .info a{color:var(--msg);}
 .info .disc{font-size:13px; opacity:.85;}
+
+.support{margin-top:30px; text-align:center; padding:24px 20px; border-radius:16px;
+    background:var(--panel-strong); border:1px solid var(--border);}
+.support h2{font-size:18px; margin-bottom:8px;}
+.support p{font-size:14px; color:var(--muted); line-height:1.6; margin-bottom:16px;}
+.support-btn{display:inline-flex; align-items:center; gap:8px; padding:13px 30px; border-radius:50px;
+    background:#0070ba; color:#fff; font-weight:700; font-size:16px; text-decoration:none; transition:.3s;}
+.support-btn:hover{background:#005ea6; transform:scale(1.04); box-shadow:0 0 18px rgba(0,112,186,.5);}
+.support .thanks{margin-top:10px; font-size:12px; color:var(--muted);}
 @keyframes bgMove{0%{background-position:left;}100%{background-position:right;}}
 @media (prefers-reduced-motion: reduce){
     body{animation:none;}
@@ -257,6 +266,7 @@ button:disabled{opacity:.5; cursor:not-allowed; transform:none; box-shadow:none;
     <a class="link" href="faq.html">FAQ</a>
     <a class="link" href="about.html">소개</a>
     <a class="link" href="contact.html">제휴문의</a>
+    <a class="link" href="#support">💝 후원</a>
 </nav>
 
 <div class="container">
@@ -304,6 +314,15 @@ button:disabled{opacity:.5; cursor:not-allowed; transform:none; box-shadow:none;
         <h2>📜 저장한 기록 <button onclick="clearHistory()">전체 삭제</button></h2>
         <div id="historyList"></div>
     </div>
+
+    <section class="support" id="support">
+        <h2>💝 이 사이트가 도움이 되셨나요?</h2>
+        <p>Premium Lotto는 무료로 운영됩니다. 작은 후원은 사이트 유지와 기능 개선에 큰 힘이 됩니다. 감사합니다! 🍀</p>
+        <a class="support-btn" href="https://www.paypal.com/donate/?hosted_button_id=7DCVQKBE7Z6LY" target="_blank" rel="noopener">
+            💳 PayPal로 후원하기
+        </a>
+        <div class="thanks">안전한 PayPal 결제 페이지로 연결됩니다.</div>
+    </section>
 
     <div class="comments">
         <h2>💬 댓글 <span id="commentCount"></span></h2>
