@@ -1,0 +1,496 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<meta name="description" content="프리미엄 로또 번호 생성기 - 공식 색상, 다중 게임, 기록 저장, 제외/고정 번호 지원">
+<meta name="theme-color" content="#1e3c72">
+<title>🍀 Premium Lotto Generator</title>
+
+<style>
+:root{
+    --bg1:#1e3c72; --bg2:#2a5298; --bg3:#6dd5ed;
+    --panel:rgba(255,255,255,0.14);
+    --panel-strong:rgba(255,255,255,0.22);
+    --text:#ffffff;
+    --muted:rgba(255,255,255,0.78);
+    --accent1:#ff9800; --accent2:#ff5722;
+    --msg:#ffe082;
+    --border:rgba(255,255,255,0.25);
+    --shadow:0 10px 30px rgba(0,0,0,.3);
+}
+html[data-theme="light"]{
+    --bg1:#a1c4fd; --bg2:#c2e9fb; --bg3:#fbc2eb;
+    --panel:rgba(255,255,255,0.55);
+    --panel-strong:rgba(255,255,255,0.75);
+    --text:#1a2a4a;
+    --muted:#3a4a6a;
+    --msg:#b8860b;
+    --border:rgba(0,0,0,0.12);
+    --shadow:0 10px 30px rgba(0,0,0,.18);
+}
+
+*{margin:0; padding:0; box-sizing:border-box; font-family:"Segoe UI","Malgun Gothic",sans-serif;}
+
+body{
+    background:linear-gradient(135deg,var(--bg1),var(--bg2),var(--bg3));
+    background-size:400% 400%;
+    animation:bgMove 12s infinite alternate;
+    min-height:100vh;
+    display:flex;
+    justify-content:center;
+    align-items:flex-start;
+    padding:24px 12px;
+    color:var(--text);
+}
+@keyframes bgMove{0%{background-position:left;}100%{background-position:right;}}
+@media (prefers-reduced-motion: reduce){
+    body{animation:none;}
+    .ball{animation:none !important;}
+}
+
+.container{
+    width:100%;
+    max-width:820px;
+    padding:32px 28px 26px;
+    background:var(--panel);
+    border:1px solid var(--border);
+    border-radius:25px;
+    backdrop-filter:blur(20px);
+    -webkit-backdrop-filter:blur(20px);
+    box-shadow:var(--shadow);
+    text-align:center;
+}
+
+.top-bar{display:flex; justify-content:flex-end; gap:8px; margin-bottom:6px;}
+.icon-btn{
+    background:var(--panel-strong); border:1px solid var(--border);
+    color:var(--text); width:42px; height:42px; border-radius:50%;
+    font-size:18px; cursor:pointer; transition:.2s;
+    display:inline-flex; align-items:center; justify-content:center;
+}
+.icon-btn:hover{transform:scale(1.08);}
+
+h1{font-size:clamp(30px,6vw,45px); margin-bottom:8px;}
+.subtitle{color:var(--muted); margin-bottom:24px; font-size:clamp(13px,3vw,16px);}
+
+.controls{
+    display:flex; flex-wrap:wrap; gap:14px 22px;
+    justify-content:center; align-items:flex-end;
+    margin-bottom:22px;
+}
+.field{display:flex; flex-direction:column; gap:6px; text-align:left;}
+.field label{font-size:13px; color:var(--muted); font-weight:600;}
+.field select, .field input{
+    padding:10px 12px; border-radius:12px;
+    border:1px solid var(--border);
+    background:var(--panel-strong); color:var(--text);
+    font-size:15px; min-width:120px; outline:none;
+}
+.field input::placeholder{color:var(--muted);}
+.hint{font-size:11px; color:var(--muted); margin-top:2px;}
+
+button{
+    padding:16px 36px; font-size:21px; border:none; border-radius:50px;
+    cursor:pointer;
+    background:linear-gradient(45deg,var(--accent1),var(--accent2));
+    color:white; font-weight:bold; transition:.3s;
+}
+button:hover{transform:scale(1.05); box-shadow:0 0 20px rgba(255,152,0,.7);}
+button:active{transform:scale(.98);}
+button:disabled{opacity:.5; cursor:not-allowed; transform:none; box-shadow:none;}
+
+.results{margin-top:30px; min-height:90px; display:flex; flex-direction:column; gap:18px;}
+
+.game-row{
+    display:flex; flex-wrap:wrap; align-items:center; justify-content:center;
+    gap:10px; padding:12px; border-radius:16px;
+    background:var(--panel-strong); border:1px solid var(--border);
+}
+.game-tag{
+    font-size:13px; font-weight:700; opacity:.85; min-width:34px;
+    display:inline-flex; align-items:center; justify-content:center;
+    height:34px; padding:0 8px; border-radius:10px;
+    background:rgba(0,0,0,.15);
+}
+.balls{display:flex; flex-wrap:wrap; gap:8px; justify-content:center; align-items:center;}
+
+.ball{
+    display:inline-flex; width:54px; height:54px;
+    justify-content:center; align-items:center;
+    border-radius:50%; color:white;
+    font-size:22px; font-weight:bold;
+    animation:pop .5s; box-shadow:0 6px 14px rgba(0,0,0,.3);
+    text-shadow:0 1px 2px rgba(0,0,0,.35);
+}
+.ball.fixed{outline:3px solid #ffd700; outline-offset:2px;}
+@keyframes pop{from{transform:scale(0); opacity:0;}to{transform:scale(1); opacity:1;}}
+
+.row-stats{font-size:12px; color:var(--muted); margin-left:4px; white-space:nowrap;}
+.copy-row{
+    background:var(--panel-strong); border:1px solid var(--border);
+    color:var(--text); width:38px; height:38px; padding:0; font-size:16px;
+    border-radius:12px;
+}
+.copy-row:hover{box-shadow:none; transform:scale(1.08);}
+
+.msg{margin-top:26px; font-size:clamp(16px,4vw,22px); font-weight:bold; color:var(--msg); min-height:28px;}
+
+.actions{margin-top:18px; display:flex; gap:10px; justify-content:center; flex-wrap:wrap;}
+.actions .small{font-size:15px; padding:10px 20px;}
+.actions .ghost{
+    background:var(--panel-strong); color:var(--text);
+    border:1px solid var(--border);
+}
+.actions .ghost:hover{box-shadow:none;}
+
+.history{margin-top:30px; text-align:left;}
+.history h2{font-size:18px; margin-bottom:10px; display:flex; justify-content:space-between; align-items:center;}
+.history h2 button{font-size:12px; padding:6px 12px; background:rgba(0,0,0,.2); color:var(--text);}
+.history-item{
+    background:var(--panel-strong); border:1px solid var(--border);
+    border-radius:12px; padding:10px 14px; margin-bottom:8px;
+    font-size:14px;
+}
+.history-item .when{font-size:11px; color:var(--muted); display:block; margin-bottom:6px;}
+.mini-ball{
+    display:inline-flex; width:30px; height:30px; border-radius:50%;
+    align-items:center; justify-content:center; color:white;
+    font-size:13px; font-weight:700; margin:2px;
+    text-shadow:0 1px 1px rgba(0,0,0,.4);
+}
+.empty{color:var(--muted); font-size:13px;}
+
+.footer{margin-top:30px; font-size:13px; color:var(--muted);}
+
+.toast{
+    position:fixed; left:50%; bottom:30px; transform:translateX(-50%) translateY(20px);
+    background:rgba(0,0,0,.82); color:#fff; padding:12px 22px; border-radius:30px;
+    font-size:14px; opacity:0; pointer-events:none; transition:.3s; z-index:50;
+}
+.toast.show{opacity:1; transform:translateX(-50%) translateY(0);}
+
+@media (max-width:520px){
+    .container{padding:24px 16px;}
+    .ball{width:46px; height:46px; font-size:19px;}
+    .field select,.field input{min-width:100px;}
+    .row-stats{width:100%; text-align:center; margin:4px 0 0;}
+}
+</style>
+</head>
+
+<body>
+<div class="container">
+
+    <div class="top-bar">
+        <button class="icon-btn" id="soundToggle" title="효과음 켜기/끄기" aria-label="효과음 토글">🔊</button>
+        <button class="icon-btn" id="themeToggle" title="테마 변경" aria-label="테마 변경">🌙</button>
+    </div>
+
+    <h1>🍀 Premium Lotto</h1>
+    <div class="subtitle">행운은 준비된 사람에게 찾아옵니다.</div>
+
+    <div class="controls">
+        <div class="field">
+            <label for="gameCount">게임 수</label>
+            <select id="gameCount">
+                <option value="1">1게임</option>
+                <option value="3">3게임</option>
+                <option value="5" selected>5게임 (A~E)</option>
+            </select>
+        </div>
+        <div class="field">
+            <label for="excludeInput">제외 번호</label>
+            <input id="excludeInput" type="text" inputmode="numeric" placeholder="예: 4, 17, 33">
+            <span class="hint">쉼표로 구분</span>
+        </div>
+        <div class="field">
+            <label for="fixedInput">고정 번호</label>
+            <input id="fixedInput" type="text" inputmode="numeric" placeholder="예: 7, 21">
+            <span class="hint">최대 5개</span>
+        </div>
+    </div>
+
+    <button id="generateBtn" onclick="generate()">🎲 번호 추천받기</button>
+
+    <div id="results" class="results" aria-live="polite"></div>
+    <div id="message" class="msg" role="status"></div>
+
+    <div class="actions" id="actions" style="display:none;">
+        <button class="small ghost" onclick="copyAll()">📋 전체 복사</button>
+        <button class="small ghost" onclick="saveCurrent()">💾 기록 저장</button>
+    </div>
+
+    <div class="history">
+        <h2>📜 저장한 기록 <button onclick="clearHistory()">전체 삭제</button></h2>
+        <div id="historyList"></div>
+    </div>
+
+    <div class="footer">Made with 🍀 · 모든 번호는 무작위이며 당첨을 보장하지 않습니다.</div>
+</div>
+
+<div class="toast" id="toast"></div>
+
+<script>
+"use strict";
+
+const messages=[
+    "🍀 오늘은 좋은 기운이 느껴집니다!",
+    "💰 이번엔 1등을 기대해보세요!",
+    "⭐ 행운은 도전하는 사람의 것입니다.",
+    "🎉 좋은 결과가 있기를 바랍니다.",
+    "🔥 대박 기원!",
+    "🌈 오늘의 행운 번호입니다."
+];
+
+// 한국 로또 공식 공 색상
+function color(num){
+    if(num<=10) return "#fbc400"; // 노랑 1-10
+    if(num<=20) return "#69c8f2"; // 파랑 11-20
+    if(num<=30) return "#ff7272"; // 빨강 21-30
+    if(num<=40) return "#aaaaaa"; // 회색 31-40
+    return "#b0d840";             // 초록 41-45
+}
+
+let currentGames=[];
+let soundOn=true;
+
+/* ---------- 입력 파싱 ---------- */
+function parseNums(str){
+    return [...new Set(
+        (str||"").split(/[,\s]+/)
+            .map(s=>parseInt(s,10))
+            .filter(n=>Number.isInteger(n) && n>=1 && n<=45)
+    )];
+}
+
+/* ---------- 효과음 (Web Audio, 파일 불필요) ---------- */
+let audioCtx=null;
+function beep(freq,delay){
+    if(!soundOn) return;
+    try{
+        audioCtx=audioCtx||new (window.AudioContext||window.webkitAudioContext)();
+        const t=audioCtx.currentTime+delay;
+        const osc=audioCtx.createOscillator();
+        const gain=audioCtx.createGain();
+        osc.frequency.value=freq;
+        osc.type="sine";
+        gain.gain.setValueAtTime(0.0001,t);
+        gain.gain.exponentialRampToValueAtTime(0.15,t+0.01);
+        gain.gain.exponentialRampToValueAtTime(0.0001,t+0.18);
+        osc.connect(gain); gain.connect(audioCtx.destination);
+        osc.start(t); osc.stop(t+0.2);
+    }catch(e){/* 무음 환경 무시 */}
+}
+
+/* ---------- 번호 생성 ---------- */
+function makeOneGame(exclude,fixed){
+    const pool=[];
+    for(let i=1;i<=45;i++){
+        if(!exclude.includes(i) && !fixed.includes(i)) pool.push(i);
+    }
+    const arr=[...fixed];
+    while(arr.length<6 && pool.length){
+        const idx=Math.floor(Math.random()*pool.length);
+        arr.push(pool.splice(idx,1)[0]);
+    }
+    return arr.sort((a,b)=>a-b);
+}
+
+function stats(arr){
+    const sum=arr.reduce((a,b)=>a+b,0);
+    const odd=arr.filter(n=>n%2===1).length;
+    const high=arr.filter(n=>n>=23).length;
+    return `합 ${sum} · 홀${odd}짝${6-odd} · 고${high}저${6-high}`;
+}
+
+function generate(){
+    const count=parseInt(document.getElementById("gameCount").value,10);
+    const exclude=parseNums(document.getElementById("excludeInput").value);
+    let fixed=parseNums(document.getElementById("fixedInput").value);
+
+    // 검증: 고정 5개 초과, 제외/고정 충돌
+    if(fixed.length>5){
+        toast("고정 번호는 최대 5개까지 가능합니다.");
+        fixed=fixed.slice(0,5);
+    }
+    fixed=fixed.filter(n=>!exclude.includes(n));
+    if(45-exclude.length<6){
+        toast("제외 번호가 너무 많습니다. (최소 6개 이상 남아야 함)");
+        return;
+    }
+
+    const results=document.getElementById("results");
+    results.innerHTML="";
+    currentGames=[];
+
+    const labels=["A","B","C","D","E"];
+    let globalDelay=0;
+
+    for(let g=0; g<count; g++){
+        const nums=makeOneGame(exclude,fixed);
+        currentGames.push(nums);
+
+        const row=document.createElement("div");
+        row.className="game-row";
+
+        const tag=document.createElement("span");
+        tag.className="game-tag";
+        tag.textContent=count>1 ? labels[g] : "🎯";
+        row.appendChild(tag);
+
+        const balls=document.createElement("div");
+        balls.className="balls";
+        nums.forEach((n,i)=>{
+            const ball=document.createElement("div");
+            ball.className="ball"+(fixed.includes(n)?" fixed":"");
+            ball.style.background=color(n);
+            ball.style.animationDelay=(globalDelay*0.08)+"s";
+            ball.textContent=n;
+            balls.appendChild(ball);
+            beep(440+n*6, globalDelay*0.08);
+            globalDelay++;
+        });
+        row.appendChild(balls);
+
+        const st=document.createElement("span");
+        st.className="row-stats";
+        st.textContent=stats(nums);
+        row.appendChild(st);
+
+        const copyBtn=document.createElement("button");
+        copyBtn.className="copy-row";
+        copyBtn.title="이 게임 복사";
+        copyBtn.textContent="📋";
+        copyBtn.onclick=()=>{ copyText(nums.join(", ")); };
+        row.appendChild(copyBtn);
+
+        results.appendChild(row);
+    }
+
+    document.getElementById("message").textContent=
+        messages[Math.floor(Math.random()*messages.length)];
+    document.getElementById("actions").style.display="flex";
+}
+
+/* ---------- 복사 ---------- */
+function copyText(text){
+    if(navigator.clipboard && navigator.clipboard.writeText){
+        navigator.clipboard.writeText(text).then(()=>toast("복사되었습니다 ✅"))
+            .catch(()=>fallbackCopy(text));
+    }else{
+        fallbackCopy(text);
+    }
+}
+function fallbackCopy(text){
+    const ta=document.createElement("textarea");
+    ta.value=text; document.body.appendChild(ta); ta.select();
+    try{ document.execCommand("copy"); toast("복사되었습니다 ✅"); }
+    catch(e){ toast("복사 실패"); }
+    document.body.removeChild(ta);
+}
+function copyAll(){
+    if(!currentGames.length) return;
+    const labels=["A","B","C","D","E"];
+    const text=currentGames.map((g,i)=>
+        (currentGames.length>1?labels[i]+": ":"")+g.join(", ")).join("\n");
+    copyText(text);
+}
+
+/* ---------- 기록 저장 (localStorage) ---------- */
+const STORE_KEY="lotto_history_v1";
+function loadHistory(){
+    try{ return JSON.parse(localStorage.getItem(STORE_KEY))||[]; }
+    catch(e){ return []; }
+}
+function saveHistory(list){
+    try{ localStorage.setItem(STORE_KEY,JSON.stringify(list)); }catch(e){}
+}
+function saveCurrent(){
+    if(!currentGames.length){ toast("저장할 번호가 없습니다."); return; }
+    const list=loadHistory();
+    list.unshift({ games:currentGames, time:new Date().toLocaleString("ko-KR") });
+    if(list.length>20) list.length=20; // 최근 20건만
+    saveHistory(list);
+    renderHistory();
+    toast("기록에 저장했습니다 💾");
+}
+function clearHistory(){
+    if(!loadHistory().length) return;
+    if(confirm("저장한 모든 기록을 삭제할까요?")){
+        saveHistory([]); renderHistory(); toast("기록을 삭제했습니다.");
+    }
+}
+function renderHistory(){
+    const box=document.getElementById("historyList");
+    const list=loadHistory();
+    if(!list.length){ box.innerHTML='<div class="empty">아직 저장한 기록이 없습니다.</div>'; return; }
+    box.innerHTML="";
+    const labels=["A","B","C","D","E"];
+    list.forEach(item=>{
+        const div=document.createElement("div");
+        div.className="history-item";
+        const when=document.createElement("span");
+        when.className="when"; when.textContent=item.time;
+        div.appendChild(when);
+        item.games.forEach((g,i)=>{
+            const line=document.createElement("div");
+            if(item.games.length>1){
+                const lab=document.createElement("span");
+                lab.style.cssText="font-weight:700;font-size:12px;margin-right:6px;opacity:.7;";
+                lab.textContent=labels[i];
+                line.appendChild(lab);
+            }
+            g.forEach(n=>{
+                const b=document.createElement("span");
+                b.className="mini-ball"; b.style.background=color(n);
+                b.textContent=n; line.appendChild(b);
+            });
+            div.appendChild(line);
+        });
+        box.appendChild(div);
+    });
+}
+
+/* ---------- 토스트 ---------- */
+let toastTimer=null;
+function toast(msg){
+    const el=document.getElementById("toast");
+    el.textContent=msg; el.classList.add("show");
+    clearTimeout(toastTimer);
+    toastTimer=setTimeout(()=>el.classList.remove("show"),2000);
+}
+
+/* ---------- 테마 / 효과음 토글 ---------- */
+function applyTheme(theme){
+    document.documentElement.setAttribute("data-theme",theme);
+    document.getElementById("themeToggle").textContent= theme==="light" ? "☀️" : "🌙";
+    try{ localStorage.setItem("lotto_theme",theme); }catch(e){}
+}
+document.getElementById("themeToggle").onclick=()=>{
+    const cur=document.documentElement.getAttribute("data-theme")==="light"?"dark":"light";
+    applyTheme(cur);
+};
+document.getElementById("soundToggle").onclick=()=>{
+    soundOn=!soundOn;
+    document.getElementById("soundToggle").textContent= soundOn ? "🔊" : "🔇";
+    toast(soundOn?"효과음 켜짐":"효과음 꺼짐");
+};
+
+/* ---------- 키보드 단축키 ---------- */
+document.addEventListener("keydown",e=>{
+    if(e.code==="Space" && e.target.tagName!=="INPUT" && e.target.tagName!=="SELECT"){
+        e.preventDefault(); generate();
+    }
+});
+
+/* ---------- 초기화 ---------- */
+(function init(){
+    let savedTheme="dark";
+    try{ savedTheme=localStorage.getItem("lotto_theme")||"dark"; }catch(e){}
+    applyTheme(savedTheme);
+    renderHistory();
+})();
+</script>
+</body>
+</html>

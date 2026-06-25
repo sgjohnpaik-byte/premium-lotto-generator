@@ -1,0 +1,5 @@
+index.backup.html
+*.backup.html
+Thumbs.db
+.DS_Store
+desktop.ini
