@@ -1,0 +1,89 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<meta name="description" content="Premium Lotto Generator 소개 - 사이트의 목적, 제공 기능, 운영 원칙을 안내합니다.">
+<meta name="theme-color" content="#1e3c72">
+<meta name="google-adsense-account" content="ca-pub-3362824047057974">
+<meta property="og:title" content="사이트 소개 · Premium Lotto">
+<meta property="og:description" content="Premium Lotto Generator의 목적과 기능을 소개합니다.">
+<meta property="og:type" content="website">
+<link rel="canonical" href="https://premium-lotto-generator-b3t.pages.dev/about.html">
+<link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><text y='.9em' font-size='90'>🍀</text></svg>">
+<title>사이트 소개 · Premium Lotto</title>
+<script async src="https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js?client=ca-pub-3362824047057974" crossorigin="anonymous"></script>
+<link rel="stylesheet" href="style.css">
+</head>
+<body>
+
+<nav class="nav">
+    <a class="brand" href="index.html">🍀 Premium Lotto</a>
+    <a class="link" href="index.html">홈</a>
+    <a class="link" href="guide.html">가이드</a>
+    <a class="link" href="faq.html">FAQ</a>
+    <a class="link active" href="about.html">소개</a>
+    <a class="link" href="contact.html">제휴문의</a>
+    <button class="theme" id="themeToggle" aria-label="테마 변경">🌙</button>
+</nav>
+
+<article class="card">
+    <h1>사이트 소개</h1>
+    <p class="lead">Premium Lotto Generator는 누구나 쉽고 편리하게 로또 번호를 받아볼 수 있도록 만든 무료 웹 도구입니다.</p>
+
+    <h2>무엇을 하는 사이트인가요?</h2>
+    <p>이 사이트는 1~45 사이의 숫자를 공정하게 무작위로 추출해 로또 6/45 번호 조합을 추천합니다. 복잡한 설치나 회원가입 없이, 브라우저만 있으면 PC와 모바일에서 바로 이용할 수 있습니다.</p>
+
+    <h2>제공하는 기능</h2>
+    <ul>
+        <li><strong>다중 게임 생성</strong> — 한 번에 최대 5게임 추천</li>
+        <li><strong>제외·고정 번호</strong> — 원하는 조건을 반영한 맞춤 추출</li>
+        <li><strong>합계·홀짝·고저 통계</strong> — 조합의 균형을 한눈에 점검</li>
+        <li><strong>기록 저장 및 복사</strong> — 마음에 드는 번호를 보관·공유</li>
+        <li><strong>다크/화이트 테마</strong> — 취향에 맞는 화면 모드</li>
+        <li><strong>댓글</strong> — 다른 이용자와 행운을 나누는 공간</li>
+    </ul>
+
+    <h2>운영 원칙</h2>
+    <p>저희는 다음 원칙을 지킵니다.</p>
+    <ol>
+        <li><strong>공정성</strong> — 모든 번호는 편향 없이 무작위로 추출됩니다.</li>
+        <li><strong>투명성</strong> — 당첨을 보장하지 않으며, 로또가 오락임을 분명히 안내합니다.</li>
+        <li><strong>개인정보 보호</strong> — 생성 기록은 이용자 기기에만 저장되며 서버로 수집하지 않습니다.</li>
+        <li><strong>건전한 이용</strong> — 19세 미만 이용 금지 및 책임감 있는 이용을 권장합니다.</li>
+    </ol>
+
+    <div class="callout">
+        🍀 <strong>한마디</strong> — 로또는 큰 기대보다 ‘작은 설렘’으로 즐길 때 가장 즐겁습니다. 감당할 수 있는 범위 안에서 가볍게 즐겨 주세요.
+    </div>
+
+    <h2>문의</h2>
+    <p>광고·제휴·협업 제안이나 개선 의견은 <a href="contact.html">제휴 문의 페이지</a> 또는 이메일(<a href="mailto:sgjohnpaik@gmail.com">sgjohnpaik@gmail.com</a>)로 보내주세요.</p>
+
+    <a class="cta" href="index.html">🎲 번호 생성기 사용하기</a>
+</article>
+
+<footer class="site-footer">
+    <div>
+        <a href="index.html">홈</a> ·
+        <a href="guide.html">가이드</a> ·
+        <a href="faq.html">FAQ</a> ·
+        <a href="about.html">소개</a> ·
+        <a href="contact.html">제휴문의</a> ·
+        <a href="privacy.html">개인정보처리방침</a> ·
+        <a href="terms.html">이용약관</a>
+    </div>
+    <div class="disclaimer">© 2026 Premium Lotto Generator · 19세 미만 구매 불가 · 모든 번호는 무작위이며 당첨을 보장하지 않습니다.</div>
+</footer>
+
+<script>
+function applyTheme(t){document.documentElement.setAttribute("data-theme",t);
+    var b=document.getElementById("themeToggle"); if(b) b.textContent=t==="light"?"☀️":"🌙";
+    try{localStorage.setItem("lotto_theme",t);}catch(e){}}
+document.addEventListener("click",function(e){
+    if(e.target&&e.target.id==="themeToggle"){
+        var cur=document.documentElement.getAttribute("data-theme")==="light"?"dark":"light";applyTheme(cur);}});
+(function(){var t="dark";try{t=localStorage.getItem("lotto_theme")||"dark";}catch(e){}applyTheme(t);})();
+</script>
+</body>
+</html>

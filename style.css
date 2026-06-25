@@ -1,0 +1,105 @@
+/* ===== 공유 스타일 (콘텐츠 페이지) ===== */
+:root{
+    --bg1:#1e3c72; --bg2:#2a5298; --bg3:#6dd5ed;
+    --panel:rgba(255,255,255,0.14); --panel-strong:rgba(255,255,255,0.22);
+    --text:#ffffff; --muted:rgba(255,255,255,0.80);
+    --accent1:#ff9800; --accent2:#ff5722; --msg:#ffe082;
+    --border:rgba(255,255,255,0.25); --shadow:0 10px 30px rgba(0,0,0,.3);
+}
+html[data-theme="light"]{
+    --bg1:#f7f9fc; --bg2:#ffffff; --bg3:#eef2f8;
+    --panel:rgba(255,255,255,0.92); --panel-strong:#ffffff;
+    --text:#1c2533; --muted:#5b6678;
+    --accent1:#ff9800; --accent2:#ff5722; --msg:#d97706;
+    --border:rgba(20,30,50,0.10); --shadow:0 8px 26px rgba(30,50,90,.12);
+}
+*{margin:0; padding:0; box-sizing:border-box; font-family:"Segoe UI","Malgun Gothic",sans-serif;}
+body{
+    background:linear-gradient(135deg,var(--bg1),var(--bg2),var(--bg3));
+    background-size:400% 400%; animation:bgMove 14s infinite alternate;
+    min-height:100vh; color:var(--text); line-height:1.6;
+    display:flex; flex-direction:column; align-items:center; padding:18px 12px 40px;
+}
+@keyframes bgMove{0%{background-position:left;}100%{background-position:right;}}
+@media (prefers-reduced-motion: reduce){body{animation:none;}}
+
+/* 네비게이션 */
+.nav{
+    width:100%; max-width:880px; display:flex; align-items:center; gap:8px;
+    padding:10px 16px; margin-bottom:18px;
+    background:var(--panel); border:1px solid var(--border); border-radius:18px;
+    backdrop-filter:blur(20px); -webkit-backdrop-filter:blur(20px); box-shadow:var(--shadow);
+    flex-wrap:wrap;
+}
+.nav .brand{font-weight:800; font-size:18px; text-decoration:none; color:var(--text); margin-right:auto;}
+.nav a.link{
+    color:var(--muted); text-decoration:none; font-size:14px; font-weight:600;
+    padding:6px 10px; border-radius:10px; transition:.2s;
+}
+.nav a.link:hover, .nav a.link.active{color:var(--text); background:var(--panel-strong);}
+.nav .theme{
+    background:var(--panel-strong); border:1px solid var(--border); color:var(--text);
+    width:38px; height:38px; border-radius:50%; cursor:pointer; font-size:16px;
+    display:inline-flex; align-items:center; justify-content:center;
+}
+
+/* 본문 카드 */
+.card{
+    width:100%; max-width:880px; padding:34px 32px;
+    background:var(--panel); border:1px solid var(--border); border-radius:22px;
+    backdrop-filter:blur(20px); -webkit-backdrop-filter:blur(20px); box-shadow:var(--shadow);
+}
+.card h1{font-size:clamp(26px,5vw,36px); margin-bottom:6px;}
+.card .lead{color:var(--muted); font-size:15px; margin-bottom:26px;}
+.card h2{font-size:21px; margin:28px 0 10px; padding-bottom:6px; border-bottom:1px solid var(--border);}
+.card h3{font-size:17px; margin:18px 0 6px;}
+.card p{font-size:15px; margin:8px 0; color:var(--text);}
+.card ul,.card ol{margin:8px 0 8px 22px;}
+.card li{font-size:15px; margin:5px 0;}
+.card a{color:var(--accent1);}
+.card strong{color:var(--text);}
+.card .muted{color:var(--muted); font-size:13px;}
+
+table.stat{width:100%; border-collapse:collapse; margin:12px 0; font-size:14px;}
+table.stat th, table.stat td{border:1px solid var(--border); padding:9px 12px; text-align:center;}
+table.stat th{background:var(--panel-strong);}
+
+.callout{
+    background:var(--panel-strong); border:1px solid var(--border);
+    border-left:4px solid var(--accent1); border-radius:12px;
+    padding:14px 16px; margin:16px 0; font-size:14px;
+}
+
+.faq-item{border-bottom:1px solid var(--border); padding:14px 0;}
+.faq-item:last-child{border-bottom:none;}
+.faq-q{font-weight:700; font-size:16px; margin-bottom:6px;}
+.faq-a{color:var(--muted); font-size:15px;}
+
+/* 광고 슬롯 자리 */
+.ad-slot{
+    width:100%; max-width:880px; margin:18px 0; min-height:90px;
+    display:flex; align-items:center; justify-content:center;
+}
+
+/* CTA 버튼 */
+.cta{
+    display:inline-block; margin-top:18px; padding:13px 30px; border-radius:50px;
+    background:linear-gradient(45deg,var(--accent1),var(--accent2));
+    color:#fff; font-weight:bold; text-decoration:none; font-size:16px; transition:.3s;
+}
+.cta:hover{transform:scale(1.04); box-shadow:0 0 20px rgba(255,152,0,.6);}
+
+/* 푸터 */
+.site-footer{
+    width:100%; max-width:880px; margin-top:24px; padding:20px 16px;
+    text-align:center; font-size:13px; color:var(--muted); line-height:1.9;
+}
+.site-footer a{color:var(--muted); text-decoration:none; margin:0 6px;}
+.site-footer a:hover{color:var(--text);}
+.site-footer .disclaimer{margin-top:10px; font-size:12px; opacity:.85;}
+
+@media (max-width:560px){
+    .card{padding:24px 18px;}
+    .nav .brand{font-size:16px;}
+    .nav a.link{font-size:13px; padding:5px 8px;}
+}
