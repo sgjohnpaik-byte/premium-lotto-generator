@@ -164,6 +164,30 @@ button:disabled{opacity:.5; cursor:not-allowed; transform:none; box-shadow:none;
 
 .footer{margin-top:30px; font-size:13px; color:var(--muted);}
 
+.comments{margin-top:30px; text-align:left;}
+.comments h2{font-size:18px; margin-bottom:12px;}
+.comments h2 span{font-size:13px; color:var(--muted); font-weight:400;}
+#commentForm{display:flex; flex-direction:column; gap:8px; margin-bottom:14px;}
+#commentForm input, #commentForm textarea{
+    padding:10px 12px; border-radius:12px; border:1px solid var(--border);
+    background:var(--panel-strong); color:var(--text); font-size:14px; outline:none; width:100%;
+}
+#commentForm input{max-width:180px;}
+#commentForm textarea{resize:vertical; min-height:64px;}
+#commentForm input::placeholder, #commentForm textarea::placeholder{color:var(--muted);}
+#commentForm button{padding:10px 22px; font-size:15px; align-self:flex-end; border-radius:50px;}
+.comment-status{font-size:13px; margin-bottom:10px; min-height:18px; color:var(--muted);}
+.comment-status.err{color:#ff8a80;}
+.comment-status.ok{color:#81c784;}
+.comment-item{
+    background:var(--panel-strong); border:1px solid var(--border);
+    border-radius:12px; padding:10px 14px; margin-bottom:8px;
+}
+.comment-item .head{display:flex; justify-content:space-between; align-items:baseline; gap:8px; margin-bottom:4px;}
+.comment-item .nick{font-weight:700; font-size:14px;}
+.comment-item .time{font-size:11px; color:var(--muted); white-space:nowrap;}
+.comment-item .body{font-size:14px; line-height:1.55; white-space:pre-wrap; word-break:break-word;}
+
 .toast{
     position:fixed; left:50%; bottom:30px; transform:translateX(-50%) translateY(20px);
     background:rgba(0,0,0,.82); color:#fff; padding:12px 22px; border-radius:30px;
@@ -225,6 +249,17 @@ button:disabled{opacity:.5; cursor:not-allowed; transform:none; box-shadow:none;
     <div class="history">
         <h2>📜 저장한 기록 <button onclick="clearHistory()">전체 삭제</button></h2>
         <div id="historyList"></div>
+    </div>
+
+    <div class="comments">
+        <h2>💬 댓글 <span id="commentCount"></span></h2>
+        <form id="commentForm">
+            <input id="nickname" type="text" maxlength="20" placeholder="닉네임" required aria-label="닉네임">
+            <textarea id="commentText" maxlength="300" placeholder="댓글을 남겨보세요 (최대 300자)" required aria-label="댓글 내용"></textarea>
+            <button type="submit">등록</button>
+        </form>
+        <div class="comment-status" id="commentStatus" role="status" aria-live="polite"></div>
+        <div id="commentList"></div>
     </div>
 
     <div class="footer">
@@ -495,6 +530,108 @@ document.addEventListener("keydown",e=>{
     applyTheme(savedTheme);
     renderHistory();
 })();
+</script>
+
+<!-- ===== 댓글 기능 (Firebase Firestore) ===== -->
+<script type="module">
+import { initializeApp } from "https://www.gstatic.com/firebasejs/10.12.5/firebase-app.js";
+import { getFirestore, collection, addDoc, query, orderBy, limit, onSnapshot, serverTimestamp }
+    from "https://www.gstatic.com/firebasejs/10.12.5/firebase-firestore.js";
+
+/* ⚠️ 아래 firebaseConfig 를 본인 Firebase 프로젝트 설정값으로 교체하세요 */
+const firebaseConfig = {
+    apiKey: "YOUR_API_KEY",
+    authDomain: "YOUR_PROJECT.firebaseapp.com",
+    projectId: "YOUR_PROJECT_ID",
+    storageBucket: "YOUR_PROJECT.appspot.com",
+    messagingSenderId: "YOUR_SENDER_ID",
+    appId: "YOUR_APP_ID"
+};
+
+const listEl = document.getElementById("commentList");
+const statusEl = document.getElementById("commentStatus");
+const form = document.getElementById("commentForm");
+const countEl = document.getElementById("commentCount");
+const nickEl = document.getElementById("nickname");
+const textEl = document.getElementById("commentText");
+
+/* 닉네임 기억 */
+try{ nickEl.value = localStorage.getItem("comment_nick") || ""; }catch(e){}
+
+if (firebaseConfig.apiKey === "YOUR_API_KEY") {
+    statusEl.className = "comment-status err";
+    statusEl.textContent = "⚠️ 댓글 기능을 사용하려면 Firebase 설정이 필요합니다.";
+} else {
+    const app = initializeApp(firebaseConfig);
+    const db = getFirestore(app);
+    const col = collection(db, "comments");
+
+    const q = query(col, orderBy("createdAt", "desc"), limit(100));
+    onSnapshot(q, (snap) => {
+        listEl.innerHTML = "";
+        countEl.textContent = "(" + snap.size + ")";
+        if (snap.empty) {
+            const e = document.createElement("div");
+            e.className = "empty";
+            e.textContent = "첫 댓글을 남겨보세요!";
+            listEl.appendChild(e);
+            return;
+        }
+        snap.forEach((docSnap) => {
+            const d = docSnap.data();
+            const item = document.createElement("div");
+            item.className = "comment-item";
+
+            const head = document.createElement("div");
+            head.className = "head";
+            const nick = document.createElement("span");
+            nick.className = "nick";
+            nick.textContent = d.nickname || "익명";          // textContent → XSS 방지
+            const time = document.createElement("span");
+            time.className = "time";
+            time.textContent = d.createdAt ? new Date(d.createdAt.toMillis()).toLocaleString("ko-KR") : "방금";
+            head.appendChild(nick); head.appendChild(time);
+
+            const body = document.createElement("div");
+            body.className = "body";
+            body.textContent = d.text || "";
+
+            item.appendChild(head); item.appendChild(body);
+            listEl.appendChild(item);
+        });
+    }, (err) => {
+        statusEl.className = "comment-status err";
+        statusEl.textContent = "❌ 댓글을 불러오지 못했습니다: " + err.message;
+    });
+
+    form.addEventListener("submit", async (e) => {
+        e.preventDefault();
+        const nickname = nickEl.value.trim();
+        const text = textEl.value.trim();
+        statusEl.className = "comment-status";
+        statusEl.textContent = "";
+        if (!nickname || !text) return;
+
+        const btn = form.querySelector("button");
+        btn.disabled = true; btn.textContent = "등록 중...";
+        try {
+            await addDoc(col, {
+                nickname: nickname.slice(0, 20),
+                text: text.slice(0, 300),
+                createdAt: serverTimestamp()
+            });
+            try{ localStorage.setItem("comment_nick", nickname.slice(0,20)); }catch(e){}
+            textEl.value = "";
+            statusEl.className = "comment-status ok";
+            statusEl.textContent = "✅ 댓글이 등록되었습니다.";
+        } catch (err) {
+            statusEl.className = "comment-status err";
+            statusEl.textContent = "❌ 등록 실패: " + err.message;
+        } finally {
+            btn.disabled = false; btn.textContent = "등록";
+        }
+    });
+}
 </script>
 </body>
 </html>
