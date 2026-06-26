@@ -218,6 +218,16 @@ button:disabled{opacity:.5; cursor:not-allowed; transform:none; box-shadow:none;
 .footer a{color:var(--muted); text-decoration:none;}
 .footer a:hover{color:var(--text); text-decoration:underline;}
 
+.cloud{margin-top:30px; text-align:left;}
+.cloud h2{font-size:18px; margin-bottom:10px;}
+.cloud-user{font-size:13px; color:var(--muted); font-weight:400;}
+.cloud-item{background:var(--panel-strong); border:1px solid var(--border); border-radius:12px;
+    padding:10px 14px; margin-bottom:8px; display:flex; align-items:center; gap:6px; flex-wrap:wrap;}
+.cloud-item .when{font-size:11px; color:var(--muted); width:100%; margin-bottom:2px;}
+.cloud-item .del{margin-left:auto; background:rgba(244,67,54,.18); border:1px solid var(--border);
+    color:var(--text); border-radius:10px; padding:4px 12px; font-size:12px; cursor:pointer;}
+.cloud-item .del:hover{background:rgba(244,67,54,.35);}
+
 .comments{margin-top:30px; text-align:left;}
 .comments h2{font-size:18px; margin-bottom:12px;}
 .comments h2 span{font-size:13px; color:var(--muted); font-weight:400;}
@@ -310,11 +320,17 @@ button:disabled{opacity:.5; cursor:not-allowed; transform:none; box-shadow:none;
     <div class="actions" id="actions" style="display:none;">
         <button class="small ghost" onclick="copyAll()">📋 전체 복사</button>
         <button class="small ghost" onclick="saveCurrent()">💾 기록 저장</button>
+        <button class="small ghost" id="cloudSaveBtn" style="display:none;">☁️ 클라우드 저장</button>
     </div>
 
     <div class="history">
         <h2>📜 저장한 기록 <button onclick="clearHistory()">전체 삭제</button></h2>
         <div id="historyList"></div>
+    </div>
+
+    <div class="cloud" id="cloudSection" style="display:none;">
+        <h2>☁️ 내 클라우드 번호 <span class="cloud-user" id="cloudUser"></span></h2>
+        <div id="cloudList"></div>
     </div>
 
     <section class="support" id="support">
@@ -376,7 +392,7 @@ function color(num){
     return "#b0d840";             // 초록 41-45
 }
 
-let currentGames=[];
+var currentGames=[];
 let soundOn=true;
 
 /* ---------- 입력 파싱 ---------- */
@@ -717,6 +733,82 @@ if (firebaseConfig.apiKey === "YOUR_API_KEY") {
         }
     });
 }
+</script>
+
+<!-- ===== 클라우드 저장 (Supabase) ===== -->
+<script type="module">
+import { createClient } from "https://esm.sh/@supabase/supabase-js@2";
+const SUPABASE_URL = "https://qebfpipnxwojwgoqjxmo.supabase.co";
+const SUPABASE_ANON_KEY = "sb_publishable_l3ZYR4EBNvbDdf49TkmwXA_LqBT-cFh";
+const supabase = createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
+
+const cloudSaveBtn = document.getElementById("cloudSaveBtn");
+const cloudSection = document.getElementById("cloudSection");
+const cloudList = document.getElementById("cloudList");
+const cloudUser = document.getElementById("cloudUser");
+
+let currentUser = null;
+function colorOf(n){ return (window.color ? window.color(n) : "#888"); }
+function notify(m){ if(window.toast) window.toast(m); }
+
+async function loadCloud(){
+    if(!currentUser) return;
+    const { data, error } = await supabase.from("saved_picks")
+        .select("*").order("created_at", { ascending:false }).limit(50);
+    if(error){ cloudList.innerHTML = '<div class="empty">불러오기 실패: '+error.message+'</div>'; return; }
+    if(!data.length){
+        cloudList.innerHTML = '<div class="empty">아직 저장한 클라우드 번호가 없습니다. 번호 생성 후 ☁️ 버튼을 눌러보세요.</div>';
+        return;
+    }
+    cloudList.innerHTML = "";
+    data.forEach(row => {
+        const item = document.createElement("div");
+        item.className = "cloud-item";
+        const when = document.createElement("span");
+        when.className = "when";
+        when.textContent = row.created_at ? new Date(row.created_at).toLocaleString("ko-KR") : "";
+        item.appendChild(when);
+        (Array.isArray(row.numbers) ? row.numbers : []).forEach(n => {
+            const b = document.createElement("span");
+            b.className = "mini-ball"; b.style.background = colorOf(n);
+            b.textContent = n; item.appendChild(b);
+        });
+        const del = document.createElement("button");
+        del.className = "del"; del.textContent = "삭제";
+        del.onclick = async () => {
+            await supabase.from("saved_picks").delete().eq("id", row.id);
+            loadCloud();
+        };
+        item.appendChild(del);
+        cloudList.appendChild(item);
+    });
+}
+
+function updateUI(){
+    if(currentUser){
+        cloudSection.style.display = "block";
+        cloudSaveBtn.style.display = "inline-block";
+        cloudUser.textContent = "(" + currentUser.email + ")";
+        loadCloud();
+    } else {
+        cloudSection.style.display = "none";
+        cloudSaveBtn.style.display = "none";
+    }
+}
+
+cloudSaveBtn.addEventListener("click", async () => {
+    const games = window.currentGames || [];
+    if(!currentUser || !games.length) return;
+    cloudSaveBtn.disabled = true;
+    const rows = games.map(g => ({ user_id: currentUser.id, numbers: g }));
+    const { error } = await supabase.from("saved_picks").insert(rows);
+    cloudSaveBtn.disabled = false;
+    if(error){ notify("저장 실패: " + error.message); }
+    else { notify("클라우드에 저장했습니다 ☁️"); loadCloud(); }
+});
+
+supabase.auth.getSession().then(({ data }) => { currentUser = data.session?.user || null; updateUI(); });
+supabase.auth.onAuthStateChange((_e, session) => { currentUser = session?.user || null; updateUI(); });
 </script>
 </body>
 </html>
